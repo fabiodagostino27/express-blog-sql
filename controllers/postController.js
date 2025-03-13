@@ -3,7 +3,7 @@ const connection = require("../data/db");
 
 const index = (req, res) => {
     //let filteredPosts = posts;
-    
+
     //if(req.query.tag) {
     //    filteredPosts = posts.filter(post => post.tags.includes(req.query.tag))
     //};
@@ -17,7 +17,7 @@ const index = (req, res) => {
         if (err) return res.status(500).json({
             error: "Database error"
         });
-        
+
         res.json(results);
     })
 };
@@ -25,7 +25,7 @@ const index = (req, res) => {
 const show = (req, res) => {
     //const id = parseInt(req.params.id);
     //const post = posts.find(post => post.id === id);
-    
+
     //if (!post) {
     //    res.status(404);
 
@@ -38,21 +38,38 @@ const show = (req, res) => {
     //res.json(post);
 
     // SQL
-    const sqlShow = "SELECT * FROM `posts` WHERE `id` = ?";
+    const postsSql = "SELECT * FROM `posts` WHERE `id` = ?";
+    const tagsSql =
+        `SELECT tags.* 
+        FROM posts 
+        JOIN post_tag ON posts.id = post_tag.post_id 
+        JOIN tags ON post_tag.tag_id = tags.id`
+
     const id = req.params.id;
 
-    connection.query(sqlShow, [id], (err, results) => {
+    connection.query(postsSql, [id], (err, postsResults) => {
         if (err) return res.status(500).json({
             error: "Database error"
         });
 
-        if (results.length === 0) {
+        if (postsResults.length === 0) {
             return res.status(404).json({
                 error: "Post non trovato"
-            })
-        }
+            });
+        };
 
-        return res.json(results)
+        const post = postsResults[0];
+
+        connection.query(tagsSql, [id], (err, tagsResults) => {
+            if (err) return res.status(500).json({
+                error: "Database error"
+            });
+
+            post.tags = tagsResults;
+            res.json(post);
+        })
+
+
     });
 
 }
@@ -76,11 +93,11 @@ const store = (req, res) => {
 const update = (req, res) => {
     const id = parseInt(req.params.id);
     const post = posts.find(post => post.id === id);
-    
+
     if (!post) {
         res.status(404);
 
-        return res.json ({
+        return res.json({
             error: "Not Found",
             message: "Post non trovato"
         })
@@ -99,7 +116,7 @@ const modify = (req, res) => res.send(`Modifica parziale del post: ${req.params.
 const destroy = (req, res) => {
     //const id = parseInt(req.params.id);
     //const post = posts.find(post => post.id === id);
-    
+
     //if (!post) {
     //    res.status(404);
 
@@ -128,12 +145,12 @@ const destroy = (req, res) => {
                 error: "Post non trovato"
             })
         }
-        
+
         connection.query(sqlDel, [id], (err) => {
             if (err) return res.status(500).json({
                 error: "Database error"
             });
-    
+
             return res.sendStatus(204)
         });
     });
@@ -141,4 +158,4 @@ const destroy = (req, res) => {
 }
 
 
-module.exports = {index, show, store, update, modify, destroy};
+module.exports = { index, show, store, update, modify, destroy };
