@@ -23,19 +23,19 @@ const index = (req, res) => {
 };
 
 const show = (req, res) => {
-    const id = parseInt(req.params.id);
-    const post = posts.find(post => post.id === id);
+    //const id = parseInt(req.params.id);
+    //const post = posts.find(post => post.id === id);
     
-    if (!post) {
-        res.status(404);
+    //if (!post) {
+    //    res.status(404);
 
-        return res.json ({
-            error: "Not Found",
-            message: "Post non trovato"
-        })
-    };
+    //    return res.json ({
+    //        error: "Not Found",
+    //        message: "Post non trovato"
+    //    })
+    //};
 
-    res.json(post);
+    //res.json(post);
 }
 
 const store = (req, res) => {
@@ -78,21 +78,47 @@ const update = (req, res) => {
 const modify = (req, res) => res.send(`Modifica parziale del post: ${req.params.id}`);
 
 const destroy = (req, res) => {
-    const id = parseInt(req.params.id);
-    const post = posts.find(post => post.id === id);
+    //const id = parseInt(req.params.id);
+    //const post = posts.find(post => post.id === id);
     
-    if (!post) {
-        res.status(404);
+    //if (!post) {
+    //    res.status(404);
 
-        return res.json ({
-            error: "Not Found",
-            message: "Post non trovato"
-        })
-    };
+    //    return res.json ({
+    //        error: "Not Found",
+    //        message: "Post non trovato"
+    //    })
+    //};
 
-    posts.splice(posts.indexOf(post), 1);
-    res.sendStatus(204);
-    console.log(posts);
+    //posts.splice(posts.indexOf(post), 1);
+    //res.sendStatus(204);
+    //console.log(posts);
+
+    // SQL
+    const sqlCheck = "SELECT * FROM `posts` WHERE `id` = ?";
+    const sqlDel = "DELETE FROM `posts` WHERE `id` = ?";
+    const id = req.params.id;
+
+    connection.query(sqlCheck, [id], (err, results) => {
+        if (err) return res.status(500).json({
+            error: "Database error"
+        });
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: "Post non trovato"
+            })
+        }
+        
+        connection.query(sqlDel, [id], (err) => {
+            if (err) return res.status(500).json({
+                error: "Database error"
+            });
+    
+            return res.sendStatus(204)
+        });
+    });
+
 }
 
 
