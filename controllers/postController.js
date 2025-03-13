@@ -36,6 +36,25 @@ const show = (req, res) => {
     //};
 
     //res.json(post);
+
+    // SQL
+    const sqlShow = "SELECT * FROM `posts` WHERE `id` = ?";
+    const id = req.params.id;
+
+    connection.query(sqlShow, [id], (err, results) => {
+        if (err) return res.status(500).json({
+            error: "Database error"
+        });
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: "Post non trovato"
+            })
+        }
+
+        return res.json(results)
+    });
+
 }
 
 const store = (req, res) => {
