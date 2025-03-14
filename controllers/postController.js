@@ -15,7 +15,7 @@ const index = (req, res) => {
 
     connection.query(sql, (err, results) => {
         if (err) return res.status(500).json({
-            error: "Database error"
+            error: "Database error" 
         });
 
         res.json(results);
@@ -39,11 +39,13 @@ const show = (req, res) => {
 
     // SQL
     const postsSql = "SELECT * FROM `posts` WHERE `id` = ?";
-    const tagsSql =
-        `SELECT tags.* 
+    const tagsSql = `
+        SELECT tags.* 
         FROM posts 
         JOIN post_tag ON posts.id = post_tag.post_id 
-        JOIN tags ON post_tag.tag_id = tags.id`
+        JOIN tags ON post_tag.tag_id = tags.id
+        WHERE post_tag.post_id = ?
+        `
 
     const id = req.params.id;
 
